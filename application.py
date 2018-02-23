@@ -1,4 +1,4 @@
-from flask import Flask, url_for, redirect, render_template, request
+from flask import Flask, flash, url_for, redirect, render_template, request
 from flask_session import Session
 
 app = Flask(__name__)
@@ -7,18 +7,43 @@ app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
-@app.route("/")
+class db():
+	users = {}
+	user_id = 0
+
+
+@app.route("/", methods=["GET", "POST"])
 def index():
-	return render_template("index.html")
+	if request.method == "GET":
+		return redirect(url_for("login"))
+	if request.method == "POST":
+		uname = find_uname_from_id(db.users, session["user_id"])
+		return render_template("index.html", name=uname)
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
 	if request.method =="GET":
 		return render_template("login.html")
-	elif request.method =="POST":
-		return redirect(url_for("index"))
 
-	return render_template("login.html")
+	elif request.method =="POST":
+		uname = request.form.get("username")
+		pw = request.form.get("password")
+
+		if not uname:
+			error = 'you must provide username'
+		elif not pw:
+			error = 'you must provide password'
+		try: 
+			match = pw == db.users[uname][0]
+		except KeyError:
+			error = 'username does not exist'
+		if not match:
+			error = 'password incorrect'
+
+		else:
+			session["user_id"] = db.users[uname][1]
+			return redirect(url_for("index"), code=307)
+
 
 @app.route("/register")
 def register():
