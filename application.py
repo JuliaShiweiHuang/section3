@@ -1,6 +1,8 @@
 from flask import Flask, flash, url_for, redirect, render_template, request
 from flask_session import Session
 
+from helpers import *
+
 app = Flask(__name__)
 
 app.config["SESSION_PERMANENT"] = False
@@ -30,15 +32,15 @@ def login():
 		pw = request.form.get("password")
 
 		if not uname:
-			error = 'you must provide username'
+			return apology("you must provide username")
 		elif not pw:
-			error = 'you must provide password'
+			return apology("you must provide password")
 		try: 
 			match = pw == db.users[uname][0]
 		except KeyError:
-			error = 'username does not exist'
+			return apology("username does not exist")
 		if not match:
-			error = 'password incorrect'
+			return apology("password incorrect")
 
 		else:
 			session["user_id"] = db.users[uname][1]
@@ -47,5 +49,7 @@ def login():
 
 @app.route("/register")
 def register():
-	return render_template("register.html")
+	if request.method == "GET":
+		return render_template("register.html")
+
 
