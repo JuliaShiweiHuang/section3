@@ -19,8 +19,9 @@ def index():
 	if request.method == "GET":
 		return redirect(url_for("login"))
 	if request.method == "POST":
-		uname = find_uname_from_id(db.users, session["user_id"])
-		return render_template("index.html", name=uname)
+		# uname = find_uname_from_id(db.users, session["user_id"])
+		# return render_template("index.html", name=uname)
+		return render_template("index.html")
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -47,9 +48,25 @@ def login():
 			return redirect(url_for("index"), code=307)
 
 
-@app.route("/register")
+@app.route("/register", methods=["GET", "POST"])
 def register():
 	if request.method == "GET":
 		return render_template("register.html")
+	elif request.method == "POST":
+		uname = request.form.get("username")
+		pw1 = request.form.get("password")
+		pw2 = request.form.get("rePassword")
+		if not uname:
+			return apology("you must provide username")
+		if not pw1 or not pw2:
+			return apology("you must provide password twice")
+		if pw1 != pw2:
+			return apology("password must match")
+		if uname in db.users:
+			return apology("username already exists")
+		else: 
+			db.user_id += 1
+			db.users[uname] = (pw1, db.user_id)
+		return redirect(url_for("login"))
 
 
