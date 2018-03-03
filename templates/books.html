@@ -1,0 +1,19 @@
+{% extends "layout.html" %}
+
+{% block heading %}
+    Books
+{% endblock %}
+
+{% block body %}
+	<h1>All Books</h1>
+
+	<ul>
+		{% for book in books %}
+		<li>
+			<a href="{{ url_for('book', book_id=book.id) }}">
+				{{book.isbn}}, {{book.title}}, {{book.author}}, {{book.year}}
+		</li>
+		{% endfor %}
+	</ul>
+
+{% endblock %}

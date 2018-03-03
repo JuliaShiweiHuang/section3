@@ -1,5 +1,8 @@
+import os
 from flask import Flask, flash, url_for, redirect, session, render_template, request
 from flask_session import Session
+from sqlalchemy import create_engine
+from sqlalchemy.orm import scoped_session, sessionmaker
 
 from helpers import *
 
@@ -8,6 +11,10 @@ app = Flask(__name__)
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
+
+engine = create_engine(os.getenv("DATABASE_URL"))
+dbBook = scoped_session(sessionmaker(bind=engine))
+
 
 class db():
 	users = {}
@@ -68,5 +75,27 @@ def register():
 			db.user_id += 1
 			db.users[uname] = (pw1, db.user_id)
 		return redirect(url_for("login"))
+
+
+@app.route("/books")
+def bookshelf():
+	"""list all books"""
+	books = dbBook.execute("SELECT * FROM juliaStore").fetchall()
+	return render_template("books.html", books=books)
+
+
+@app.route("/books/<int:id>")
+def book(id):
+	book = dbBook.execute("SELECT * FROM juliaStore WHERE id = :id", {"id": id}).fetchone()
+	if book is None:
+		return render_template("error.html", message="No such book")
+
+	juliaStore = dbBook.execute("SELECT title FROM juliaStore where id = :id",
+								{"id": id}).fetchall()
+	return render_template("book.html", book=book, juliaStore=juliaStore)
+
+
+
+
 
 
