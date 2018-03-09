@@ -78,13 +78,15 @@ def register():
 
 
 @app.route("/books")
-def bookshelf():
+def books():
 	"""list all books"""
 	books = dbBook.execute("SELECT * FROM juliaStore").fetchall()
 	return render_template("books.html", books=books)
 
 
-@app.route("/books/<int:id>")
+
+
+@app.route("/book/<int:id>")
 def book(id):
 	book = dbBook.execute("SELECT * FROM juliaStore WHERE id = :id", {"id": id}).fetchone()
 	if book is None:
@@ -95,7 +97,7 @@ def book(id):
 	return render_template("book.html", book=book, juliaStore=juliaStore)
 
 
-
-
+@app.route("search", methods=["GET", "POST"])
+def search():
 
 
