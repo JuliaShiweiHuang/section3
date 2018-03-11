@@ -97,7 +97,17 @@ def book(id):
 	return render_template("book.html", book=book, juliaStore=juliaStore)
 
 
-@app.route("search", methods=["GET", "POST"])
+@app.route("/search", methods=["GET", "POST"])
 def search():
+	return render_template("search.html")
+	
+
+@app.route("/results", methods=["POST"])
+def results():
+	titleQuery = request.form["title"]
+	results = dbBook.execute("SELECT * FROM juliaStore WHERE TITLE = :title",
+								{"title": titleQuery}).fetchall()
+	return render_template("results.html", results=results)
+
 
 
